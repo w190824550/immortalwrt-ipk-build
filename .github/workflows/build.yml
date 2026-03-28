@@ -56,13 +56,18 @@ jobs:
           cd ~/immortalwrt
           make package/luci-app-adguardhome/compile -j$(nproc)
 
-      - name: Collect ipk
+           - name: Collect ipk
         run: |
-          mkdir -p ~/artifacts
-          find ~/immortalwrt/bin/packages -name "*adguardhome*.ipk" -exec cp {} ~/artifacts/ \;
+          mkdir -p /home/runner/artifacts
+          find /home/runner/immortalwrt/bin -type f -name "*adguardhome*.ipk" -exec cp -v {} /home/runner/artifacts/ \;
+          echo "==== artifacts ===="
+          ls -lah /home/runner/artifacts || true
+          echo "==== matched ipk in bin ===="
+          find /home/runner/immortalwrt/bin -type f -name "*adguardhome*.ipk" || true
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: adguardhome-ipk
-          path: ~/artifacts/
+          path: /home/runner/artifacts
+          if-no-files-found: error
