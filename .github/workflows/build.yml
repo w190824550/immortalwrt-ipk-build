@@ -19,11 +19,11 @@ jobs:
 
       - name: Clone ImmortalWrt
         run: |
-          git clone --depth 1 https://github.com/immortalwrt/immortalwrt.git ~/immortalwrt
+          git clone --depth 1 https://github.com/immortalwrt/immortalwrt.git /home/runner/immortalwrt
 
       - name: Add feeds
         run: |
-          cd ~/immortalwrt
+          cd /home/runner/immortalwrt
           echo 'src-git kenzo https://github.com/kenzok8/openwrt-packages' >> feeds.conf.default
           echo 'src-git small https://github.com/kenzok8/small' >> feeds.conf.default
           ./scripts/feeds update -a
@@ -31,12 +31,12 @@ jobs:
 
       - name: Fix fwupd bug
         run: |
-          cd ~/immortalwrt
+          cd /home/runner/immortalwrt
           rm -rf feeds/packages/utils/fwupd || true
 
       - name: Configure
         run: |
-          cd ~/immortalwrt
+          cd /home/runner/immortalwrt
           cat > .config << 'EOF'
           CONFIG_TARGET_x86=y
           CONFIG_TARGET_x86_64=y
@@ -47,16 +47,18 @@ jobs:
 
       - name: Build tools & toolchain
         run: |
-          cd ~/immortalwrt
+          cd /home/runner/immortalwrt
           make tools/install -j$(nproc)
           make toolchain/install -j$(nproc)
 
       - name: Build package
         run: |
-          cd ~/immortalwrt
-          make package/luci-app-adguardhome/compile -j$(nproc)
+          cd /home/runner/immortalwrt
+          make package/luci-app-adguardhome/compile -j$(nproc) V=s
+          echo "==== search built ipk after compile ===="
+          find /home/runner/immortalwrt/bin -type f -name "*adguardhome*.ipk" || true
 
-           - name: Collect ipk
+      - name: Collect ipk
         run: |
           mkdir -p /home/runner/artifacts
           find /home/runner/immortalwrt/bin -type f -name "*adguardhome*.ipk" -exec cp -v {} /home/runner/artifacts/ \;
