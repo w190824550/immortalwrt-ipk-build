@@ -51,10 +51,15 @@ jobs:
           make tools/install -j$(nproc)
           make toolchain/install -j$(nproc)
 
+      - name: Prepare package
+        run: |
+          cd /home/runner/immortalwrt
+          make package/luci-app-adguardhome/prepare V=s
+
       - name: Build package
         run: |
           cd /home/runner/immortalwrt
-          make package/luci-app-adguardhome/compile -j$(nproc) V=s
+          make package/luci-app-adguardhome/compile -j1 V=s
           echo "==== search built ipk after compile ===="
           find /home/runner/immortalwrt/bin -type f -name "*adguardhome*.ipk" || true
 
